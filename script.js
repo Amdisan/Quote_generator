@@ -34,25 +34,67 @@ async function getQuotes() {
   }
 }
 
+function loadinSpinnerToggle(loaderEl, quoteContainer) {
+  const loaderElHiddenAttr = loaderEl.hidden;
+  const quoteContainerHiddenAttr = quoteContainer.hidden;
+
+  if (!quoteContainerHiddenAttr && !loaderElHiddenAttr) {
+    return {
+      loaderElHidden: false,
+      quoteContainerHidden: true,
+    };
+  }
+  if (!loaderElHiddenAttr && quoteContainerHiddenAttr) {
+    return {
+      loaderElHidden: true,
+      quoteContainerHidden: false,
+    };
+  }
+  if (loaderElHiddenAttr && !quoteContainerHiddenAttr) {
+    return {
+      loaderElHidden: false,
+      quoteContainerHidden: true,
+    };
+  }
+  console.log("Something wrong with loader");
+  return {
+    loaderElHidden: false,
+    quoteContainerHidden: false,
+  };
+}
+
 //On Load
 async function onLoad() {
   const newQuoteBtn = document.querySelector("#new-quote");
   const author = document.querySelector("#author");
   const quote = document.querySelector("#quote");
+  const twitterBtn = document.querySelector("#twitter");
+  const loader = document.querySelector("#loader");
+  const quoteContainer = document.querySelector("#quote-container");
+
+  let toggleSpinner = loadinSpinnerToggle(loader, quoteContainer);
+  loader.hidden = toggleSpinner.loaderElHidden;
+  quoteContainer.hidden = toggleSpinner.quoteContainerHidden;
 
   const data = await getQuotes();
-
   const randomQuote = newQuote(data);
 
-  quote.textContent = isLongText(randomQuote, quote);
+  toggleSpinner = loadinSpinnerToggle(loader, quoteContainer);
+  loader.hidden = toggleSpinner.loaderElHidden;
+  quoteContainer.hidden = toggleSpinner.quoteContainerHidden;
 
+  quote.textContent = isLongText(randomQuote, quote);
   author.textContent = validAuthor(randomQuote);
 
   newQuoteBtn.addEventListener("click", () => {
     const newRandomQuote = newQuote(data);
     quote.textContent = isLongText(newRandomQuote, quote);
-
     author.textContent = validAuthor(newRandomQuote);
+  });
+
+  twitterBtn.addEventListener("click", async () => {
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${quote.textContent} - ${author.textContent}$`;
+    window.open(twitterUrl, "_blank");
   });
 }
 
